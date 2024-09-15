@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: school-organisation-website
+    repo: https://github.com/definitelyna/School-organisation-website-backend
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node app.js
+    preDeployCommand:
+    region: singapore
+    branch: main
+    
