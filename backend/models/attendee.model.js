@@ -8,17 +8,18 @@ const AttendeeSchema = mongoose.Schema({
 
   phoneNumber: {
     type: String,
-    required: [true, "Please enter day"],
+    required: [true, "Please enter phone number"],
   },
 
   email: {
     type: String,
-    required: [true, "Please enter start time"],
+    required: [true, "Please enter email"],
   },
 
   hasArrived: {
     type: Boolean,
-    required: [true, "Please enter end time"],
+    default: false,
+    required: false
   },
 
   arrivalTime: {
