@@ -1,8 +1,7 @@
 const mongoose = require("mongoose")
 
 const AttendeeSchema = mongoose.Schema({
-  _id: false,
-  stt: {
+  _id: {
     type: Number,
     required: [true, "Please enter stt"],
     unique: true,
