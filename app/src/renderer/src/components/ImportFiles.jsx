@@ -15,7 +15,7 @@ export default function ImportFiles(prop) {
   const applyChangeToKeys = (obj, changeFunc) => {
     return Object.keys(obj).reduce((newObj, key) => {
       const newKey = changeFunc(key) // Apply the change to the key
-      if (key === 'stt') {
+      if (newKey === 'stt') {
         newObj['_id'] = obj[key]
       } else {
         newObj[newKey] = obj[key] // Assign the original value to the new key
@@ -56,6 +56,7 @@ export default function ImportFiles(prop) {
         skipEmptyLines: true,
         complete: async (result) => {
           const adjustedResult = adjustDataToAPI(result.data)
+          console.log(adjustedResult)
           await postAPI(adjustedResult)
           await prop.updateDatabase()
         },

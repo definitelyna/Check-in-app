@@ -28,7 +28,8 @@
     "@mui/material": "^6.1.0",
     "@mui/x-data-grid": "^7.17.0",
     "electron-updater": "^6.1.7",
-    "papaparse": "^5.4.1"
+    "papaparse": "^5.4.1",
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",
