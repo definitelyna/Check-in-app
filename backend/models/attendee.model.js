@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const AttendeeSchema = mongoose.Schema({
   _id: {
@@ -7,28 +7,36 @@ const AttendeeSchema = mongoose.Schema({
   },
   name: {
     type: String,
-    required: false
+    required: false,
   },
 
   address: {
     type: String,
-    required: false
+    required: false,
   },
 
   size: {
     type: String,
-    required: false
+    required: false,
   },
 
   phoneNumber: {
     type: String,
-    required: false
+    required: false,
+  },
+
+  qrCode: {
+    type: String,
+    required: false,
+    default: function () {
+      return `https://raw.githubusercontent.com/definitelyna/check-in-qr-codes/main/checkInAttendee${this._id}.png`;
+    },
   },
 
   hasArrived: {
     type: Boolean,
     default: false,
-    required: false
+    required: false,
   },
 
   arrivalTime: {
