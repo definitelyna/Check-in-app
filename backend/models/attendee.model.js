@@ -8,12 +8,12 @@ const AttendeeSchema = mongoose.Schema({
   },
   name: {
     type: String,
-    required: [true, "Please enter name"],
+    required: false
   },
 
   address: {
     type: String,
-    required: [true, "Please enter address"]
+    required: false
   },
 
   size: {
@@ -23,7 +23,7 @@ const AttendeeSchema = mongoose.Schema({
 
   phoneNumber: {
     type: String,
-    required: [true, "Please enter phone number"],
+    required: false
   },
 
   hasArrived: {
