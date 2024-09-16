@@ -78,3 +78,12 @@ app.put("/api/attendees/update/:id", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+app.delete("/api/attendees/deleteall", async (req, res) => {
+  try {
+    const attendee = await Attendee.deleteMany({})
+    res.status(200).json("Deleted all documents")
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
