@@ -4,7 +4,9 @@ const AttendeeSchema = mongoose.Schema({
   _id: false,
   stt: {
     type: Number,
-    required: [true, "Please enter stt"]
+    required: [true, "Please enter stt"],
+    unique: true,
+    index: true,
   },
   name: {
     type: String,
