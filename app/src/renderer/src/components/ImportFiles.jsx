@@ -29,24 +29,6 @@ export default function ImportFiles(prop) {
     return thisArrayOfObject.map((eachObj) => applyChangeToKeys(eachObj, camelize))
   }
 
-  const postAPI = async (data) => {
-    try {
-      const response = await fetch('https://check-in-app.onrender.com/api/attendees', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data) // Convert data to JSON string
-      })
-
-      // Handle the response
-      const result = await response.json() // Parse the response as JSON
-      console.log('Success:', result)
-    } catch (error) {
-      console.error('Error:', error)
-    }
-  }
-
   const handleFileUpload = (e) => {
     const file = e.target.files[0]
 
@@ -57,7 +39,7 @@ export default function ImportFiles(prop) {
         complete: async (result) => {
           const adjustedResult = adjustDataToAPI(result.data)
           console.log(adjustedResult)
-          await postAPI(adjustedResult)
+          await prop.postAPI(adjustedResult)
           await prop.updateDatabase()
         },
         error: () => {}

@@ -4,7 +4,6 @@ import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import CssBaseline from '@mui/material/CssBaseline'
 import MuiAppBar from '@mui/material/AppBar'
-import Toolbar from '@mui/material/Toolbar'
 import List from '@mui/material/List'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
@@ -96,7 +95,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function UIOverlay(prop) {
   const theme = useTheme()
-  const [open, setOpen] = React.useState(true)
+  const [open, setOpen] = React.useState(false)
   const handleDrawerOpen = () => {
     setOpen(true)
   }
@@ -113,37 +112,40 @@ export default function UIOverlay(prop) {
     <ThemeProvider theme={darkTheme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        <AppBar position="fixed" open={open}>
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              edge="start"
-              sx={[
-                {
-                  mr: 2
-                },
-                open && { display: 'none' }
-              ]}
-            >
-              <MenuIcon />
-            </IconButton>
-            <div
-              style={{
-                margin: 'auto',
+        <AppBar
+          position="fixed"
+          open={open}
+          sx={[{ width: 40, height: 40, left: 0 }, open && { display: 'none' }]}
+        >
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            sx={[
+              {
+                width: 'inherit',
                 display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}
-            >
-              {sidebarIcons[prop.pageName]}
-              <Typography variant="h6" noWrap component="div">
-                {prop.pageName}
-              </Typography>
-            </div>
-          </Toolbar>
+                justifyContent: 'center',
+                alignItems: 'center'
+              },
+            ]}
+          >
+            <MenuIcon />
+          </IconButton>
+          <div
+            style={{
+              margin: 'auto',
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            {sidebarIcons[prop.pageName]}
+            <Typography variant="h6" noWrap component="div">
+              {prop.pageName}
+            </Typography>
+          </div>
         </AppBar>
 
         <Drawer
@@ -178,7 +180,6 @@ export default function UIOverlay(prop) {
           <Divider />
         </Drawer>
         <Main open={open} sx={{ height: '100vh' }}>
-          <DrawerHeader />
           {prop.children}
         </Main>
       </Box>

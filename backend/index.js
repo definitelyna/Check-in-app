@@ -25,7 +25,7 @@ function toTitleCase(str) {
 
 app.post("/api/attendees", async (req, res) => {
   try {
-    const attendee = await Attendee.create(req.body);
+    const attendee = await Attendee.insertMany(req.body);
     res.status(200).json(attendee);
   } catch (error) {
     res.status(500).json({ message: error.message });

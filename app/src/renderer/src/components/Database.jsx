@@ -6,17 +6,13 @@ import ImportFiles from './ImportFiles'
 import DeleteDatabase from './DeleteDatabase'
 import { styled } from '@mui/system'
 import { Unstable_Popup as BasePopup } from '@mui/base/Unstable_Popup'
+import { useGridApiRef, GridToolbar } from '@mui/x-data-grid'
 
 function QRCode(props) {
   const [anchor, setAnchor] = useState(null)
 
   const handlePopupClick = (event) => {
     setAnchor(anchor ? null : event.currentTarget)
-  }
-
-  const handleDeleteClick = async () => {
-    deleteAPI()
-    prop.updateDatabase()
   }
 
   const open = Boolean(anchor)
@@ -37,23 +33,20 @@ function QRCode(props) {
 }
 
 const columns = [
-  { field: '_id', type: 'number', headerName: 'STT', width: 90 },
+  { field: '_id', type: 'number', headerName: 'STT' },
   {
     field: 'name',
     headerName: 'Name',
-    width: 150,
     editable: true
   },
   {
     field: 'address',
     headerName: 'Address',
-    width: 150,
     editable: true
   },
   {
     field: 'phoneNumber',
     headerName: 'Phone No.',
-    width: 150,
     editable: true,
     type: 'String'
   },
@@ -74,7 +67,6 @@ const columns = [
   {
     field: 'timeEntered',
     headerName: 'Time checked-in',
-    width: 130,
     editable: true
   },
   {
@@ -86,6 +78,8 @@ const columns = [
 
 export default function Database() {
   const [rows, setRows] = useState([])
+  const apiRef = useGridApiRef()
+  const [isLoading, setIsLoading] = useState(false)
 
   // function sortArrayOfObjectByProperty(arr, property) {
   //   const sortedArray = arr.sort((a, b) => {
@@ -113,22 +107,55 @@ export default function Database() {
     }
   }
 
+  const postAPI = async (data) => {
+    try {
+      const response = await fetch('https://check-in-app.onrender.com/api/attendees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data) // Convert data to JSON string
+      })
+
+      // Handle the response
+      const result = await response.json() // Parse the response as JSON
+      console.log('Success:', result)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
   useEffect(() => {
+    setIsLoading(true)
     fetch('https://check-in-app.onrender.com/api/attendees') // Replace with your API endpoint
       .then((response) => response.json())
       .then((data) => setRows(data))
+      .then(() => {
+        apiRef.current.autosizeColumns()
+        setIsLoading(false)
+      })
       .catch((error) => console.error('Error fetching data:', error))
   }, [])
 
+  const handleOnCellEditStop = (e) => {}
+
   return (
-    <Box sx={{ height: 400, width: '100%' }}>
+    <Box sx={{ height: '90vh', width: '90%', marginInline: 'auto' }}>
       <DataGrid
         rows={rows}
         columns={columns}
         getRowClassName={(params) => (params.row.attended ? style.highlightedRow : '')} // Apply class based on boolean value
         getRowId={(row) => row._id}
+        apiRef={apiRef}
         disableRowSelectionOnClick
+        disableColumnSorting
         pageSize={5}
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true
+          }
+        }}
         rowsPerPageOptions={[400]}
         initialState={{
           sorting: {
@@ -144,12 +171,16 @@ export default function Database() {
           },
           [`& .${gridClasses.columnHeader}:hover`]: {}
         }}
+        onCellEditStop={handleOnCellEditStop}
       />
 
       <div className={style.operationWrap}>
-        <ImportFiles updateDatabase={() => getAPI()} />
+        {rows != [] ? (
+          <ImportFiles updateDatabase={() => getAPI()} postAPI={() => postAPI()} />
+        ) : (
+          <div></div>
+        )}
         <DeleteDatabase updateDatabase={() => getAPI()} />
-          <pre>{JSON.stringify(rows, null, 2)}</pre>
       </div>
     </Box>
   )
