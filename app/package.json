@@ -29,7 +29,8 @@
     "@mui/x-data-grid": "^7.17.0",
     "electron-updater": "^6.1.7",
     "papaparse": "^5.4.1",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "react-qr-reader": "^3.0.0-beta-1"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",

@@ -7,8 +7,9 @@ import DeleteDatabase from './DeleteDatabase'
 import { styled } from '@mui/system'
 import { Unstable_Popup as BasePopup } from '@mui/base/Unstable_Popup'
 import { useGridApiRef, GridToolbar } from '@mui/x-data-grid'
+import QrReaderComponent from './QrReader'
 
-function QRCode(props) {
+function QRCode(prop) {
   const [anchor, setAnchor] = useState(null)
 
   const handlePopupClick = (event) => {
@@ -25,7 +26,7 @@ function QRCode(props) {
       </Button>
       <BasePopup id={id} open={open} anchor={anchor}>
         <PopupBody>
-          <img src={props.value} />
+          <img src={prop.value} />
         </PopupBody>
       </BasePopup>
     </div>
@@ -59,9 +60,10 @@ const columns = [
   },
 
   {
-    field: 'attended',
+    field: 'hasArrived',
     headerName: 'Attended ?',
     editable: true,
+    default: false,
     type: 'boolean'
   },
   {
@@ -79,20 +81,8 @@ const columns = [
 export default function Database() {
   const [rows, setRows] = useState([])
   const apiRef = useGridApiRef()
+  const [webCamResult, setWebCamResult] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-
-  // function sortArrayOfObjectByProperty(arr, property) {
-  //   const sortedArray = arr.sort((a, b) => {
-  //     if (a[property] < b[property]) {
-  //       return -1
-  //     }
-  //     if (a[property] > b[property]) {
-  //       return 1
-  //     }
-  //     return 0 // if equal
-  //   })
-  //   return sortedArray
-  // }
 
   const getAPI = async () => {
     try {
@@ -108,9 +98,29 @@ export default function Database() {
   }
 
   const postAPI = async (data) => {
+    console.log(data)
     try {
       const response = await fetch('https://check-in-app.onrender.com/api/attendees', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data) // Convert data to JSON string
+      })
+
+      // Handle the response
+      const result = await response.json() // Parse the response as JSON
+      console.log('Success:', result)
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
+  const updateAPI = async (data) => {
+    console.log(data)
+    try {
+      const response = await fetch('https://check-in-app.onrender.com/api/attendees', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -137,14 +147,27 @@ export default function Database() {
       .catch((error) => console.error('Error fetching data:', error))
   }, [])
 
-  const handleOnCellEditStop = (e) => {}
+  const handleProcessRowUpdate = async (updatedRow, oldRow) => {
+    try {
+      // Send the updated row data in the POST request
+      await updateAPI(updatedRow) // Call the postAPI function with the updated row
+
+      // Return the updated row so the DataGrid knows the update was successful
+      return updatedRow
+    } catch (error) {
+      console.error('Error updating row:', error)
+
+      // If the API request fails, return the old row to revert the changes
+      return oldRow
+    }
+  }
 
   return (
     <Box sx={{ height: '90vh', width: '90%', marginInline: 'auto' }}>
       <DataGrid
         rows={rows}
         columns={columns}
-        getRowClassName={(params) => (params.row.attended ? style.highlightedRow : '')} // Apply class based on boolean value
+        getRowClassName={(params) => (params.row.hasArrived ? style.highlightedRow : '')}
         getRowId={(row) => row._id}
         apiRef={apiRef}
         disableRowSelectionOnClick
@@ -162,6 +185,7 @@ export default function Database() {
             sortModel: [{ field: '_id', sort: 'asc' }]
           }
         }}
+        processRowUpdate={handleProcessRowUpdate} // Use the updated row update handler
         sx={{
           [`& .${gridClasses.cell}:focus, & .${gridClasses.cell}:focus-within`]: {
             outline: 'none'
@@ -169,17 +193,22 @@ export default function Database() {
           [`& .${gridClasses.columnHeader}:focus, & .${gridClasses.columnHeader}:focus-within`]: {
             outline: 'none'
           },
-          [`& .${gridClasses.columnHeader}:hover`]: {}
-        }}
-        onCellEditStop={handleOnCellEditStop}
-      />
 
+          [`& .${gridClasses.row}:hover`]: {
+            backgroundColor: 'none'
+          }
+        }}
+      />
       <div className={style.operationWrap}>
         {rows != [] ? (
-          <ImportFiles updateDatabase={() => getAPI()} postAPI={() => postAPI()} />
+          <ImportFiles updateDatabase={() => getAPI()} postAPI={(value) => postAPI(value)} />
         ) : (
           <div></div>
         )}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <QrReaderComponent setWebCamResult={(param) => setWebCamResult(param)} setRows={(param) => setRows(param)} rows={rows} updateAPI={updateAPI}/>
+          {webCamResult && <p>Scanned result: {webCamResult}</p>}
+        </div>
         <DeleteDatabase updateDatabase={() => getAPI()} />
       </div>
     </Box>

@@ -38,7 +38,6 @@ export default function ImportFiles(prop) {
         skipEmptyLines: true,
         complete: async (result) => {
           const adjustedResult = adjustDataToAPI(result.data)
-          console.log(adjustedResult)
           await prop.postAPI(adjustedResult)
           await prop.updateDatabase()
         },
