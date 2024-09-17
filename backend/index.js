@@ -22,7 +22,6 @@ function toTitleCase(str) {
   );
 }
 
-
 app.post("/api/attendees", async (req, res) => {
   try {
     const attendee = await Attendee.insertMany(req.body);
@@ -69,10 +68,20 @@ app.get("/api/attendees/:category/:categoryFilter", async (req, res) => {
   }
 });
 
-app.put("/api/attendees/update/:id", async (req, res) => {
+app.put("/api/attendees/update/:_id", async (req, res) => {
   try {
-    const { id } = req.params;
-    const attendee = await Attendee.findByIdAndUpdate(id, req.body);
+    const { _id } = req.params;
+    const attendee = await Attendee.findByIdAndUpdate(_id, req.body);
+    res.status(200).json(attendee);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.put("/api/attendees", async (req, res) => {
+  try {
+    const _id = req.body._id;
+    const attendee = await Attendee.findByIdAndUpdate(_id, req.body);
     res.status(200).json(attendee);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -81,8 +90,8 @@ app.put("/api/attendees/update/:id", async (req, res) => {
 
 app.delete("/api/attendees/deleteall", async (req, res) => {
   try {
-    const attendee = await Attendee.deleteMany({})
-    res.status(200).json("Deleted all documents")
+    const attendee = await Attendee.deleteMany({});
+    res.status(200).json("Deleted all documents");
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
