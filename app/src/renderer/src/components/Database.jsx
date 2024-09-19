@@ -7,7 +7,7 @@ import DeleteDatabase from './DeleteDatabase'
 import { styled } from '@mui/system'
 import { Unstable_Popup as BasePopup } from '@mui/base/Unstable_Popup'
 import { useGridApiRef, GridToolbar } from '@mui/x-data-grid'
-import QrReaderComponent from './QrReader'
+import QrCodeReader from './QrCodeReader'
 
 function QRCode(prop) {
   const [anchor, setAnchor] = useState(null)
@@ -37,17 +37,17 @@ const columns = [
   { field: '_id', type: 'number', headerName: 'STT' },
   {
     field: 'name',
-    headerName: 'Name',
+    headerName: 'Tên',
     editable: true
   },
   {
     field: 'address',
-    headerName: 'Address',
+    headerName: 'Địa chỉ',
     editable: true
   },
   {
     field: 'phoneNumber',
-    headerName: 'Phone No.',
+    headerName: 'SĐT',
     editable: true,
     type: 'String'
   },
@@ -61,14 +61,14 @@ const columns = [
 
   {
     field: 'hasArrived',
-    headerName: 'Attended ?',
+    headerName: 'Đá đến?',
     editable: true,
     default: false,
     type: 'boolean'
   },
   {
-    field: 'timeEntered',
-    headerName: 'Time checked-in',
+    field: 'arrivalTime',
+    headerName: 'Giờ check-in',
     editable: true
   },
   {
@@ -163,53 +163,72 @@ export default function Database() {
   }
 
   return (
-    <Box sx={{ height: '90vh', width: '90%', marginInline: 'auto' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        getRowClassName={(params) => (params.row.hasArrived ? style.highlightedRow : '')}
-        getRowId={(row) => row._id}
-        apiRef={apiRef}
-        disableRowSelectionOnClick
-        disableColumnSorting
-        pageSize={5}
-        slots={{ toolbar: GridToolbar }}
-        slotProps={{
-          toolbar: {
-            showQuickFilter: true
-          }
-        }}
-        rowsPerPageOptions={[400]}
-        initialState={{
-          sorting: {
-            sortModel: [{ field: '_id', sort: 'asc' }]
-          }
-        }}
-        processRowUpdate={handleProcessRowUpdate} // Use the updated row update handler
-        sx={{
-          [`& .${gridClasses.cell}:focus, & .${gridClasses.cell}:focus-within`]: {
-            outline: 'none'
-          },
-          [`& .${gridClasses.columnHeader}:focus, & .${gridClasses.columnHeader}:focus-within`]: {
-            outline: 'none'
-          },
+    <Box sx={{ display: 'flex', flexDirection: 'row' }}>
+      <div style={{ height: '90vh', width: '70%' }}>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          getRowClassName={(params) => (params.row.hasArrived ? style.highlightedRow : '')}
+          getRowId={(row) => row._id}
+          apiRef={apiRef}
+          disableRowSelectionOnClick
+          disableColumnSorting
+          pageSize={5}
+          slots={{ toolbar: GridToolbar }}
+          slotProps={{
+            toolbar: {
+              showQuickFilter: true
+            }
+          }}
+          rowsPerPageOptions={[400]}
+          initialState={{
+            sorting: {
+              sortModel: [{ field: '_id', sort: 'asc' }]
+            }
+          }}
+          processRowUpdate={handleProcessRowUpdate} // Use the updated row update handler
+          sx={{
+            [`& .${gridClasses.cell}:focus, & .${gridClasses.cell}:focus-within`]: {
+              outline: 'none'
+            },
+            [`& .${gridClasses.columnHeader}:focus, & .${gridClasses.columnHeader}:focus-within`]: {
+              outline: 'none'
+            },
 
-          [`& .${gridClasses.row}:hover`]: {
-            backgroundColor: 'none'
-          }
-        }}
-      />
-      <div className={style.operationWrap}>
-        {rows != [] ? (
-          <ImportFiles updateDatabase={() => getAPI()} postAPI={(value) => postAPI(value)} />
-        ) : (
-          <div></div>
-        )}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <QrReaderComponent setWebCamResult={(param) => setWebCamResult(param)} setRows={(param) => setRows(param)} rows={rows} updateAPI={updateAPI}/>
-          {webCamResult && <p>Scanned result: {webCamResult}</p>}
+            [`& .${gridClasses.row}:hover`]: {
+              backgroundColor: 'none'
+            }
+          }}
+        />
+        <div className={style.operationWrap}>
+          {rows != [] ? (
+            <ImportFiles updateDatabase={() => getAPI()} postAPI={(value) => postAPI(value)} />
+          ) : (
+            <div></div>
+          )}
+          <DeleteDatabase updateDatabase={() => getAPI()} />
         </div>
-        <DeleteDatabase updateDatabase={() => getAPI()} />
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: 'fit-content',
+          marginInline: 'auto'
+        }}
+      >
+        <QrCodeReader
+          setWebCamResult={(param) => setWebCamResult(param)}
+          setRows={(param) => setRows(param)}
+          rows={rows}
+          updateAPI={updateAPI}
+        />
+        {webCamResult && (
+          <p>
+            Đã quét người với STT: <b>{webCamResult}</b>
+          </p>
+        )}
       </div>
     </Box>
   )

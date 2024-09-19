@@ -8,7 +8,6 @@ import List from '@mui/material/List'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
-import MenuIcon from '@mui/icons-material/Menu'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import ListItem from '@mui/material/ListItem'
@@ -28,7 +27,7 @@ const darkTheme = createTheme({
   }
 })
 
-const sidebarOptions = ['Database']
+const sidebarOptions = ['Database', 'Qr Code Reader']
 
 const sidebarIcons = {
   Dashboard: <DashboardIcon />,
@@ -105,7 +104,7 @@ export default function UIOverlay(prop) {
   }
 
   const handleSidebarClick = (option) => {
-    console.log(option)
+    prop.setPageName(option.replace(/\s+/g, '')) //Remove spaces from option
   }
 
   return (
@@ -115,7 +114,7 @@ export default function UIOverlay(prop) {
         <AppBar
           position="fixed"
           open={open}
-          sx={[{ width: 40, height: 40, left: 0 }, open && { display: 'none' }]}
+          sx={[{ width: 0, height: 0, left: 0 }, open && { display: 'none' }]}
         >
           <IconButton
             color="inherit"
@@ -127,10 +126,9 @@ export default function UIOverlay(prop) {
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center'
-              },
+              }
             ]}
           >
-            <MenuIcon />
           </IconButton>
           <div
             style={{
