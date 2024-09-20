@@ -1,32 +1,65 @@
-import { useEffect, useState } from 'react'
-import { QrReader } from 'react-qr-reader'
-import style from "./QrCodeReader.module.css"
+import { useEffect } from 'react'
 import dayjs from 'dayjs'
 
-
 export default function QrCodeReader(prop) {
-  const [hasCameraAccess, setHasCameraAccess] = useState(false)
-  useEffect(() => {
-    navigator.permissions.query({ name: 'camera' }).then((permissionStatus) => {
-      if (permissionStatus.state === 'granted') {
-        console.log('Camera access already granted.')
-        setHasCameraAccess(true)
-      } else if (permissionStatus.state === 'prompt') {
-        console.log('Requesting camera access.')
-        setHasCameraAccess(false)
-      } else {
-        console.log('Camera access denied.')
-        setHasCameraAccess(false)
-      }
+  const handleEnterPressed = (data) => {
+    const checkInID = data.split('attendee')[1]
+    prop.setIdJustCheckedIn(checkInID)
+    tickAttendance(checkInID)
+  }
 
-      permissionStatus.onchange = () => {
-        console.log('Permission status changed:', permissionStatus.state)
+  function matchWord(referenceString) {
+    let currentWord = ''
+
+    setInterval(() => {
+      currentWord = ''
+      console.log('Erasing keyboard input')
+    }, 1000)
+
+    return function (inputChar) {
+      currentWord += inputChar
+
+      // Check if the current input matches the start of the reference string
+      if (currentWord.length < referenceString.length) {
+        if (referenceString.startsWith(currentWord)) {
+          console.log(`Building word: ${currentWord}`)
+        } else {
+          console.log(`No match. Resetting...`)
+          currentWord = '' // Reset if there's no match
+        }
+      } else {
+        console.log(currentWord)
+        if (currentWord.includes('Enter')) {
+          const removedEnterWord = currentWord.replace('Enter', '')
+
+          console.log(`Code: ${removedEnterWord}`)
+          handleEnterPressed(removedEnterWord)
+          currentWord = '' // Reset after a match
+        }
       }
-    })
+    }
+  }
+
+  const referenceString = 'checkinattendee'
+  const checkWord = matchWord(referenceString)
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const keyPressed = event.key
+      checkWord(keyPressed)
+    }
+
+    // Add event listener
+    window.addEventListener('keydown', handleKeyDown)
+
+    // Cleanup event listener on component unmount
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
   }, [])
 
   const tickAttendance = (checkInID) => {
-    const currentTime = dayjs().format('HH:mm');
+    const currentTime = dayjs().format('HH:mm')
 
     prop.setRows((prevArray) =>
       prevArray.map((obj) => {
@@ -37,7 +70,8 @@ export default function QrCodeReader(prop) {
             arrivalTime: currentTime
           }
 
-          prop.updateAPI(updatedObj) // Uncomment when you want to call the API to update the backend
+          // console.log(updatedObj)
+          prop.updateAPI(updatedObj)
           return updatedObj
         }
         return obj // Return the object unchanged if the ID doesn't match
@@ -47,20 +81,9 @@ export default function QrCodeReader(prop) {
     // Use a callback here to ensure we get the latest state after setRows
   }
 
-  const handleScan = (data) => {
-    if (data) {
-      const checkInID = data.text.split('Attendee')[1]
-      prop.setWebCamResult(checkInID)
-      tickAttendance(checkInID)
-    }
-  }
-
   return (
     <>
-      <h1>QR Code Scanner</h1>
-      {hasCameraAccess && (
-        <QrReader onResult={handleScan} facingMode="environment" classNam={style.qrReaderWrap} />
-      )}
+
     </>
   )
 }

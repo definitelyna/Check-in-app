@@ -8,28 +8,38 @@ import { styled } from '@mui/system'
 import { Unstable_Popup as BasePopup } from '@mui/base/Unstable_Popup'
 import { useGridApiRef, GridToolbar } from '@mui/x-data-grid'
 import QrCodeReader from './QrCodeReader'
+import { ClickAwayListener } from '@mui/material'
+import dayjs from 'dayjs'
+import NotiModal from './NotiModal'
 
 function QRCode(prop) {
   const [anchor, setAnchor] = useState(null)
+  const [open, setOpen] = useState(false)
 
   const handlePopupClick = (event) => {
     setAnchor(anchor ? null : event.currentTarget)
+    setOpen((prev) => !prev)
   }
 
-  const open = Boolean(anchor)
+  const handleClickAway = () => {
+    setOpen(false)
+  }
+
   const id = open ? 'simple-popup' : undefined
 
   return (
-    <div>
-      <Button aria-describedby={id} type="button" onClick={handlePopupClick}>
-        Show
-      </Button>
-      <BasePopup id={id} open={open} anchor={anchor}>
-        <PopupBody>
-          <img src={prop.value} />
-        </PopupBody>
-      </BasePopup>
-    </div>
+    <ClickAwayListener onClickAway={handleClickAway}>
+      <div>
+        <Button aria-describedby={id} type="button" onClick={handlePopupClick}>
+          Mở
+        </Button>
+        <BasePopup id={id} open={open} anchor={anchor}>
+          <PopupBody>
+            <img src={prop.value} />
+          </PopupBody>
+        </BasePopup>
+      </div>
+    </ClickAwayListener>
   )
 }
 
@@ -38,24 +48,24 @@ const columns = [
   {
     field: 'name',
     headerName: 'Tên',
-    editable: true
+    editable: false
   },
   {
     field: 'address',
     headerName: 'Địa chỉ',
-    editable: true
+    editable: false
   },
   {
     field: 'phoneNumber',
     headerName: 'SĐT',
-    editable: true,
+    editable: false,
     type: 'String'
   },
 
   {
     field: 'size',
     headerName: 'Size',
-    editable: true,
+    editable: false,
     type: 'String'
   },
 
@@ -81,15 +91,16 @@ const columns = [
 export default function Database() {
   const [rows, setRows] = useState([])
   const apiRef = useGridApiRef()
-  const [webCamResult, setWebCamResult] = useState('')
+  const [idJustCheckedIn, setIdJustCheckedIn] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [notiOpen, setNotiOpen] = useState(false)
 
   const getAPI = async () => {
     try {
       const response = await fetch('https://check-in-app.onrender.com/api/attendees')
       // Handle the response
       const result = await response.json() // Parse the response as JSON
-      console.log('Success:', result)
+      console.log('Retrieved data success:', result)
 
       setRows(result)
     } catch (error) {
@@ -110,7 +121,7 @@ export default function Database() {
 
       // Handle the response
       const result = await response.json() // Parse the response as JSON
-      console.log('Success:', result)
+      console.log('Posted successfully:', result)
     } catch (error) {
       console.error('Error:', error)
     }
@@ -129,7 +140,7 @@ export default function Database() {
 
       // Handle the response
       const result = await response.json() // Parse the response as JSON
-      console.log('Success:', result)
+      console.log('Updated successfully:', result)
     } catch (error) {
       console.error('Error:', error)
     }
@@ -147,13 +158,41 @@ export default function Database() {
       .catch((error) => console.error('Error fetching data:', error))
   }, [])
 
+  useEffect(() => {
+    //Implementing the setInterval method
+    const interval = setInterval(() => {
+      fetch('https://check-in-app.onrender.com/api/attendees') // Replace with your API endpoint
+        .then((response) => response.json())
+        .then((data) => setRows(data))
+        .then(() => {
+          apiRef.current.autosizeColumns()
+          setIsLoading(false)
+        })
+        .catch((error) => console.error('Error fetching data:', error))
+    }, 5000)
+
+    //Clearing the interval
+    return () => clearInterval(interval)
+  }, [rows])
+
+  useEffect(() => {setNotiOpen(true)}, [idJustCheckedIn])
+
   const handleProcessRowUpdate = async (updatedRow, oldRow) => {
+    let newUpdatedRow = updatedRow
+    if (oldRow.hasArrived && !updatedRow.hasArrived) {
+      newUpdatedRow = { ...updatedRow, arrivalTime: '' }
+    } else if (!oldRow.hasArrived && updatedRow.hasArrived) {
+      const currentTime = dayjs().format('HH:mm')
+      newUpdatedRow = { ...updatedRow, arrivalTime: currentTime }
+    }
+    console.log(newUpdatedRow)
+
     try {
       // Send the updated row data in the POST request
-      await updateAPI(updatedRow) // Call the postAPI function with the updated row
+      await updateAPI(newUpdatedRow) // Call the postAPI function with the updated row
 
       // Return the updated row so the DataGrid knows the update was successful
-      return updatedRow
+      return newUpdatedRow
     } catch (error) {
       console.error('Error updating row:', error)
 
@@ -164,7 +203,8 @@ export default function Database() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-      <div style={{ height: '90vh', width: '70%' }}>
+      <NotiModal open={notiOpen} setOpen={setNotiOpen} />
+      <div style={{ height: '90vh', width: '90vw', marginInline: 'auto' }}>
         <DataGrid
           rows={rows}
           columns={columns}
@@ -201,34 +241,19 @@ export default function Database() {
           }}
         />
         <div className={style.operationWrap}>
-          {rows != [] ? (
+          {JSON.stringify(rows) == '[]' ? (
             <ImportFiles updateDatabase={() => getAPI()} postAPI={(value) => postAPI(value)} />
           ) : (
             <div></div>
           )}
           <DeleteDatabase updateDatabase={() => getAPI()} />
         </div>
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          width: 'fit-content',
-          marginInline: 'auto'
-        }}
-      >
         <QrCodeReader
-          setWebCamResult={(param) => setWebCamResult(param)}
+          setIdJustCheckedIn={setIdJustCheckedIn}
           setRows={(param) => setRows(param)}
           rows={rows}
           updateAPI={updateAPI}
         />
-        {webCamResult && (
-          <p>
-            Đã quét người với STT: <b>{webCamResult}</b>
-          </p>
-        )}
       </div>
     </Box>
   )
