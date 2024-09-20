@@ -29,7 +29,7 @@ const AttendeeSchema = mongoose.Schema({
     type: String,
     required: false,
     default: function () {
-      return `https://raw.githubusercontent.com/definitelyna/check-in-qr-codes/main/checkInAttendee${this._id}.png`;
+      return `https://raw.githubusercontent.com/definitelyna/check-in-qr-codes/refs/heads/master/checkinattendee${this._id}.png`;
     },
   },
 
