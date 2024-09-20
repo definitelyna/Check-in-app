@@ -45,6 +45,13 @@ const AttendeeSchema = mongoose.Schema({
   },
 });
 
+AttendeeSchema.pre("save", function (next) {
+  if (!this.hasArrived) {
+    this.arrivalTime = ""; // Clear the value of 'description'
+  }
+  next();
+});
+
 const Attendee = mongoose.model("Attendee", AttendeeSchema);
 
 module.exports = Attendee;
