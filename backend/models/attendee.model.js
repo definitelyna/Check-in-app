@@ -15,9 +15,9 @@ const AttendeeSchema = mongoose.Schema({
     required: false,
   },
 
-  size: {
+  group: {
     type: String,
-    required: false,
+    required: false
   },
 
   phoneNumber: {
