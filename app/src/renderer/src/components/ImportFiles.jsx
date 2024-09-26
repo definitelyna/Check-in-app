@@ -1,32 +1,24 @@
 import Papa from 'papaparse'
 
+const mapDataKeyToDatabaseKey = {
+  'STT': '_id',
+  'HỌ VÀ TÊN': 'name',
+  'ĐỊA CHỈ': 'address',
+  'ĐƠN VỊ/ CÔNG TY/ HỘI/ HIỆP HỘI/ CLB': 'group',
+  'ĐIỆN THOẠI': 'phoneNumber'
+}
+
 export default function ImportFiles(prop) {
-
-  function camelize(str) {
-    return (
-      str.charAt(0).toLowerCase() +
-      str
-        .slice(1)
-        .toLowerCase()
-        .replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase())
-    )
-  }
-
-  const applyChangeToKeys = (obj, changeFunc) => {
+  const applyChangeToKeys = (obj) => {
     return Object.keys(obj).reduce((newObj, key) => {
-      const newKey = changeFunc(key) // Apply the change to the key
-      if (newKey === 'stt') {
-        newObj['_id'] = obj[key]
-      } else {
-        newObj[newKey] = obj[key] // Assign the original value to the new key
-      }
+      newObj[mapDataKeyToDatabaseKey[key]] = obj[key]
 
       return newObj
     }, {})
   }
 
   const adjustDataToAPI = (thisArrayOfObject) => {
-    return thisArrayOfObject.map((eachObj) => applyChangeToKeys(eachObj, camelize))
+    return thisArrayOfObject.map((eachObj) => applyChangeToKeys(eachObj))
   }
 
   const handleFileUpload = (e) => {
@@ -50,7 +42,7 @@ export default function ImportFiles(prop) {
 
   return (
     <>
-      <input type="file" accept=".csv" onChange={handleFileUpload}/>
+      <input type="file" accept=".csv" onChange={handleFileUpload} />
     </>
   )
 }

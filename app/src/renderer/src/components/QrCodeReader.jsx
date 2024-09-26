@@ -13,7 +13,6 @@ export default function QrCodeReader(prop) {
 
     setInterval(() => {
       currentWord = ''
-      console.log('Erasing keyboard input')
     }, 1000)
 
     return function (inputChar) {

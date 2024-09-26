@@ -3,14 +3,15 @@ import { DataGrid, gridClasses } from '@mui/x-data-grid'
 import { useState, useEffect } from 'react'
 import style from './Database.module.css'
 import ImportFiles from './ImportFiles'
-import DeleteDatabase from './DeleteDatabase'
 import { styled } from '@mui/system'
 import { Unstable_Popup as BasePopup } from '@mui/base/Unstable_Popup'
 import { useGridApiRef, GridToolbar } from '@mui/x-data-grid'
 import QrCodeReader from './QrCodeReader'
 import { ClickAwayListener } from '@mui/material'
 import dayjs from 'dayjs'
-import NotiModal from './NotiModal'
+
+const apiUrl = import.meta.env.VITE_API_URL
+console.log(apiUrl)
 
 function QRCode(prop) {
   const [anchor, setAnchor] = useState(null)
@@ -56,22 +57,19 @@ const columns = [
     editable: false
   },
   {
+    field: 'group',
+    headerName: 'ĐƠN VỊ/ CÔNG TY/ HỘI/ HIỆP HỘI/ CLB',
+    editable: false
+  },
+  {
     field: 'phoneNumber',
     headerName: 'SĐT',
     editable: false,
     type: 'String'
   },
-
-  {
-    field: 'size',
-    headerName: 'Size',
-    editable: false,
-    type: 'String'
-  },
-
   {
     field: 'hasArrived',
-    headerName: 'Đá đến?',
+    headerName: 'Đã đến?',
     editable: true,
     default: false,
     type: 'boolean'
@@ -97,7 +95,7 @@ export default function Database() {
 
   const getAPI = async () => {
     try {
-      const response = await fetch('https://check-in-app.onrender.com/api/attendees')
+      const response = await fetch(apiUrl)
       // Handle the response
       const result = await response.json() // Parse the response as JSON
       console.log('Retrieved data success:', result)
@@ -111,7 +109,7 @@ export default function Database() {
   const postAPI = async (data) => {
     console.log(data)
     try {
-      const response = await fetch('https://check-in-app.onrender.com/api/attendees', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -130,7 +128,7 @@ export default function Database() {
   const updateAPI = async (data) => {
     console.log(data)
     try {
-      const response = await fetch('https://check-in-app.onrender.com/api/attendees', {
+      const response = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -148,7 +146,7 @@ export default function Database() {
 
   useEffect(() => {
     setIsLoading(true)
-    fetch('https://check-in-app.onrender.com/api/attendees') // Replace with your API endpoint
+    fetch(apiUrl) // Replace with your API endpoint
       .then((response) => response.json())
       .then((data) => setRows(data))
       .then(() => {
@@ -161,7 +159,7 @@ export default function Database() {
   useEffect(() => {
     //Implementing the setInterval method
     const interval = setInterval(() => {
-      fetch('https://check-in-app.onrender.com/api/attendees') // Replace with your API endpoint
+      fetch(apiUrl) // Replace with your API endpoint
         .then((response) => response.json())
         .then((data) => setRows(data))
         .then(() => {
@@ -175,7 +173,9 @@ export default function Database() {
     return () => clearInterval(interval)
   }, [rows])
 
-  useEffect(() => {setNotiOpen(true)}, [idJustCheckedIn])
+  useEffect(() => {
+    setNotiOpen(true)
+  }, [idJustCheckedIn])
 
   const handleProcessRowUpdate = async (updatedRow, oldRow) => {
     let newUpdatedRow = updatedRow
@@ -203,7 +203,6 @@ export default function Database() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'row' }}>
-      <NotiModal open={notiOpen} setOpen={setNotiOpen} />
       <div style={{ height: '90vh', width: '90vw', marginInline: 'auto' }}>
         <DataGrid
           rows={rows}
@@ -246,7 +245,12 @@ export default function Database() {
           ) : (
             <div></div>
           )}
-          <DeleteDatabase updateDatabase={() => getAPI()} />
+          {idJustCheckedIn && (
+            <p>
+              Vừa check-in STT: <b>{idJustCheckedIn}</b>
+            </p>
+          )}
+
         </div>
         <QrCodeReader
           setIdJustCheckedIn={setIdJustCheckedIn}

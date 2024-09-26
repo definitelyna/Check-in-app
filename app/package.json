@@ -1,10 +1,10 @@
 {
-  "name": "na-check-in",
+  "name": "Check-in-HANICT",
   "version": "1.0.0",
-  "description": "An Electron application with React",
+  "description": "Check-in app for event",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "HANICT",
+  "homepage": "https://hanict.org.vn/",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -28,12 +28,13 @@
     "@mui/material": "^6.1.0",
     "@mui/x-data-grid": "^7.17.0",
     "dayjs": "^1.11.13",
+    "dotenv": "^16.4.5",
     "electron-updater": "^6.1.7",
     "electron-webpack": "^2.8.2",
     "node-hid": "^3.1.0",
     "papaparse": "^5.4.1",
     "qrcode": "^1.5.4",
-    "react-qr-reader": "^3.0.0-beta-1",
+    "react-qr-reader": "^2.2.1",
     "usb": "^2.14.0"
   },
   "devDependencies": {

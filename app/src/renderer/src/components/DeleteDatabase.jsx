@@ -2,11 +2,13 @@ import { Unstable_Popup as BasePopup } from '@mui/base/Unstable_Popup'
 import { styled } from '@mui/system'
 import { useState } from 'react'
 
+const apiUrl = import.meta.env.VITE_API_URL
+
 export default function DeleteDatabase(prop) {
 
   const deleteAPI = async () => {
     try {
-      const response = await fetch('https://check-in-app.onrender.com/api/attendees/deleteall', {
+      const response = await fetch(`${apiUrl}/deleteall`, {
         method: 'DELETE'
       })
       // Handle the response
